@@ -240,7 +240,7 @@ function criarMensagemTexto({ texto, isMe = true, reply = null }) {
         </div>
 
     </div>
-    `;
+    `; 
 
     chatMain.insertAdjacentHTML('beforeend', html);
     scrollToBottom();
