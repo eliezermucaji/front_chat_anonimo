@@ -3,10 +3,13 @@ const micButton = document.getElementById('mic-button');
     let mediaRecorder;
     let audioChunks = [];
 
-    micButton.addEventListener('click', async () => {
+let stream;
+
+micButton.addEventListener('click', async () => {
     try {
         if (!isRecording) {
-            const stream = await navigator.mediaDevices.getUserMedia({
+
+            stream = await navigator.mediaDevices.getUserMedia({
                 audio: true
             });
 
@@ -14,7 +17,9 @@ const micButton = document.getElementById('mic-button');
             audioChunks = [];
 
             mediaRecorder.ondataavailable = (event) => {
-                audioChunks.push(event.data);
+                if (event.data && event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
             };
 
             mediaRecorder.onstop = async () => {
@@ -29,7 +34,6 @@ const micButton = document.getElementById('mic-button');
 
                 console.log("Processando voz de criança...");
 
-                // 👶 transforma o áudio
                 const childBlob = await criarAudioVozCrianca(audioBlob);
 
                 const reader = new FileReader();
@@ -46,12 +50,12 @@ const micButton = document.getElementById('mic-button');
                     };
 
                     socket.emit('send_message', msg);
+
+                    // stop do microfone (só aqui, correto)
+                    stream.getTracks().forEach(track => track.stop());
                 };
 
                 reader.readAsDataURL(childBlob);
-                socket.emit('send_message', msg);
-
-                stream.getTracks().forEach(track => track.stop());
             };
 
             mediaRecorder.start();
@@ -60,11 +64,13 @@ const micButton = document.getElementById('mic-button');
             micButton.classList.add('recording-active');
 
         } else {
+
             mediaRecorder.stop();
 
             isRecording = false;
             micButton.classList.remove('recording-active');
         }
+
     } catch (error) {
         console.error(error);
         alert("Não foi possível aceder ao microfone");
@@ -74,6 +80,7 @@ const micButton = document.getElementById('mic-button');
 //CRIA VOZ CRIANÇA
 async function criarAudioVozCrianca(audioBlob) {
     const audioCtx = new AudioContext();
+    await audioCtx.resume(); // 🔥 importante em mobile
 
     const arrayBuffer = await audioBlob.arrayBuffer();
     const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
@@ -81,8 +88,8 @@ async function criarAudioVozCrianca(audioBlob) {
     const source = audioCtx.createBufferSource();
     source.buffer = audioBuffer;
 
-    // 👶 VOZ DE CRIANÇA (efeito real)
-    source.playbackRate.value = 1.35; // mais rápido = mais “jovem”
+    // 👶 efeito voz de criança
+    source.playbackRate.value = 1.35;
 
     const dest = audioCtx.createMediaStreamDestination();
     source.connect(dest);
@@ -94,22 +101,32 @@ async function criarAudioVozCrianca(audioBlob) {
     let chunks = [];
 
     recorder.ondataavailable = (e) => {
-        chunks.push(e.data);
+        if (e.data && e.data.size > 0) {
+            chunks.push(e.data);
+        }
     };
 
-    const finalBlob = await new Promise((resolve) => {
+    const finalBlob = await new Promise((resolve, reject) => {
         recorder.onstop = () => {
-            const newBlob = new Blob(chunks, { type: "audio/webm" });
-            resolve(newBlob);
+            try {
+                const newBlob = new Blob(chunks, { type: "audio/webm" });
+                resolve(newBlob);
+            } catch (err) {
+                reject(err);
+            }
         };
 
-        recorder.start();
-        source.start();
+        recorder.onerror = (err) => reject(err);
+
+        recorder.start(100); // 🔥 melhora estabilidade
+        source.start(0);
 
         source.onended = () => {
             recorder.stop();
         };
     });
+
+    await audioCtx.close(); // 🔥 evita memory leak
 
     return finalBlob;
 }
