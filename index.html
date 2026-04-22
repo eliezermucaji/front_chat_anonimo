@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Neuser Chat | Web</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#1c1b1b",
+                        "on-surface-variant": "#c6c5d7",
+                        "on-tertiary": "#512300",
+                        "on-secondary-fixed-variant": "#005228",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-variant": "#353534",
+                        "surface-container-highest": "#353534",
+                        "on-primary-fixed-variant": "#222fc2",
+                        "surface-container-high": "#2a2a2a",
+                        "primary-container": "#5865f2",
+                        "secondary-container": "#06bb63",
+                        "surface-tint": "#bec2ff",
+                        "primary": "#bec2ff",
+                        "on-primary": "#000da4",
+                        "on-surface": "#e5e2e1",
+                        "secondary-fixed": "#6bfe9c",
+                        "on-tertiary-fixed-variant": "#743500",
+                        "surface-bright": "#393939",
+                        "inverse-primary": "#3f4cda",
+                        "on-primary-fixed": "#000569",
+                        "surface": "#131313",
+                        "tertiary-fixed-dim": "#ffb689",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#313030",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-container": "#fffdff",
+                        "surface-container": "#201f1f",
+                        "on-background": "#e5e2e1",
+                        "on-secondary-fixed": "#00210c",
+                        "outline": "#8f8fa0",
+                        "inverse-surface": "#e5e2e1",
+                        "tertiary-fixed": "#ffdbc8",
+                        "error": "#ffb4ab",
+                        "tertiary-container": "#bb5a00",
+                        "secondary-fixed-dim": "#4ae183",
+                        "background": "#131313",
+                        "tertiary": "#ffb689",
+                        "primary-fixed-dim": "#bec2ff",
+                        "error-container": "#93000a",
+                        "outline-variant": "#454655",
+                        "on-secondary": "#003919",
+                        "surface-dim": "#131313",
+                        "secondary": "#4ae183",
+                        "on-tertiary-container": "#fffdff",
+                        "primary-fixed": "#e0e0ff",
+                        "on-secondary-container": "#00431f",
+                        "on-tertiary-fixed": "#311300"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "space-xs": "4px",
+                        "space-lg": "24px",
+                        "sidebar-width": "280px",
+                        "gutter": "16px",
+                        "space-xl": "32px",
+                        "space-sm": "8px",
+                        "unit": "4px",
+                        "space-md": "16px"
+                    },
+                    "fontFamily": {
+                        "caption": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "h1": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "h2": ["Inter"]
+                    },
+                    "fontSize": {
+                        "caption": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "h1": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "h2": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #131313;
+            color: #e5e2e1;
+            -webkit-tap-highlight-color: transparent;
+            height: 100dvh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .message-entrance {
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reaction-scale:active {
+            transform: scale(1.4);
+            transition: transform 0.1s ease;
+        }
+        .glass-header {
+            background: rgba(19, 19, 19, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .waveform-bar {
+            width: 3px;
+            background-color: currentColor;
+            border-radius: 99px;
+        }
+        /* Custom scrollbar for better look */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+    
+        @keyframes pulse-red {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .recording-active {
+            background-color: #ef4444 !important;
+            color: white !important;
+            border-radius: 9999px;
+            animation: pulse-red 2s infinite;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md overflow-hidden h-[100dvh] flex flex-col">
+<!-- TopAppBar -->
+<header class="shrink-0 glass-header border-b border-white/5 h-14 flex items-center justify-between px-4 z-50">
+<div class="flex items-center gap-3">
+<button class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-white/10 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-zinc-400">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-h2 text-body-md text-on-surface">Chat das confundições</span>
+<span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_rgba(74,225,131,0.5)]"></span>
+</div>
+<span class="text-caption font-caption text-zinc-500">visto por último às 14:20</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[#5865F2]" data-icon="dark_mode">dark_mode</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-zinc-400">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Main Chat Area -->
+<main class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-6 max-w-2xl mx-auto w-full custom-scrollbar">
+
+</main>
+<!-- Bottom Input Field -->
+<footer class="shrink-0 glass-header px-4 py-3 flex items-end gap-2 border-t border-white/5 z-50">
+<div class="flex-1 bg-surface-container-high rounded-3xl min-h-[48px] flex items-end p-1 transition-all focus-within:ring-2 focus-within:ring-[#5865F2]/50 border border-white/5 overflow-hidden">
+<button class="w-10 h-10 shrink-0 flex items-center justify-center text-zinc-400 hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+</button>
+<textarea id="msg-field" class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface py-2 px-1 max-h-32 resize-none text-body-md placeholder:text-zinc-500" placeholder="Mensagem" rows="1"></textarea>
+<div class="flex items-center shrink-0">
+<button class="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors" id="gallery-button">
+<span class="material-symbols-outlined" data-icon="image">image</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors" id="mic-button">
+<span class="material-symbols-outlined" data-icon="mic">mic</span>
+</button>
+</div>
+</div>
+<button class="w-12 h-12 shrink-0 rounded-full bg-[#5865F2] flex items-center justify-center text-white shadow-lg active:scale-90 transition-transform" id="send-msg">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</footer>
+<script src="http://172.20.10.6:3000/socket.io/socket.io.js"></script>
+<script>
+    // Auto-resize textarea
+    const textarea = document.querySelector('textarea');
+    textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+        // Limit max height to 128px as per tailwind max-h-32
+        if (this.scrollHeight > 128) {
+            this.style.overflowY = 'auto';
+        } else { 
+            this.style.overflowY = 'hidden';
+        }
+    });
+</script>
+<input accept="image/*" class="hidden" id="image-input" type="file"/>
+<script>
+    const socket = io('http://172.20.10.6:3000')
+    const imageInput = document.getElementById('image-input');
+    const galleryButton = document.getElementById('gallery-button');
+    const chatMain = document.querySelector('main');
+    const snd_btn = document.getElementById('send-msg');
+    const msg_field = document.getElementById('msg-field');
+    const chat_id = 45;
+
+    const scrollToBottom = () => {
+        chatMain.scrollTo({
+            top: chatMain.scrollHeight,
+            behavior: 'smooth'
+        });
+    };
+
+    galleryButton.addEventListener('click', () => {
+        imageInput.click();
+    });
+
+    snd_btn.addEventListener('click', ()=>{
+        if(!msg_field.value) return;
+        criarMensagemTexto({
+            texto: msg_field.value,
+            isMe: true,
+            reply: null
+        });
+        const msg = {
+            text: msg_field.value,
+            type:'text',
+            chat_id
+        }
+        socket.emit('send_message', msg)
+        msg_field.value = ''
+    });
+
+    socket.emit('teste_entrar', chat_id);
+
+    socket.on('new_message', (info)=>{
+        if(info.msg.type === 'text') {
+            criarMensagemTexto(
+                {
+                    texto:info.msg.text,
+                    isMe: info.token_id === socket.id,
+                    reply:null,
+                }
+            )
+        }else if(info.msg.type === 'audio') {
+            criarMensagemAudio(info.msg.audio, info.token_id === socket.id)
+        }else if(info.msg.type === 'image') {
+            criarMensagemImagem(info.msg.image, info.token_id === socket.id)
+        }
+    })
+
+
+    function criarMensagemImagem(imageUrl, isMe = true) {
+    const now = new Date();
+    const time = now.getHours().toString().padStart(2, '0') + ':' +
+                 now.getMinutes().toString().padStart(2, '0');
+
+    const containerClass = isMe
+        ? "items-end self-end"
+        : "items-start";
+
+    const bubbleClass = isMe
+        ? "bg-[#5865F2]"
+        : "bg-surface-container-high";
+
+    const borderRadius = isMe
+        ? "rounded-tr-none"
+        : "rounded-tl-none";
+
+    const checkIcon = isMe
+        ? `<span class="material-symbols-outlined text-[12px] text-secondary" style="font-variation-settings: 'FILL' 1;">done_all</span>`
+        : "";
+
+    const timeClass = isMe ? "mr-1" : "ml-1";
+
+    const html = `
+    <div class="flex flex-col gap-1 max-w-[85%] message-entrance shrink-0 ${containerClass}">
+        
+        <div class="${bubbleClass} p-1 rounded-2xl ${borderRadius} border border-white/10 overflow-hidden shadow-lg">
+            <img src="${imageUrl}" class="w-full max-h-[40vh] object-cover rounded-xl">
+        </div>
+
+        <div class="flex items-center gap-1 ${timeClass}">
+            <span class="text-[10px] text-zinc-500">${time}</span>
+            ${checkIcon}
+        </div>
+
+    </div>
+    `;
+
+    chatMain.insertAdjacentHTML('beforeend', html);
+    scrollToBottom();
+}
+
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const imageUrl = event.target.result;
+                
+                criarMensagemImagem(imageUrl, true);
+                const msg = {
+                    image:imageUrl,
+                    type:'image',
+                    chat_id
+                }
+                socket.emit('send_message', msg);
+                scrollToBottom();
+                imageInput.value = ''; // Reset input
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script><script src="script.js"></script>
+</body></html>
