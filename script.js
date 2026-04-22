@@ -101,6 +101,15 @@ micButton.addEventListener('click', async () => {
     }
 });
 
+function gerarWaveform() {
+    let bars = "";
+    for (let i = 0; i < 20; i++) {
+        const height = Math.floor(Math.random() * 20) + 5;
+        bars += `<div class="waveform-bar" style="height:${height}px"></div>`;
+    }
+    return bars;
+}
+
 
 // CRIA VOZ CRIANÇA
 async function criarAudioVozCrianca(audioBlob) {
