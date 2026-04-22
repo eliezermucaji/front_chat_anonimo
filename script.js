@@ -32,16 +32,23 @@ const micButton = document.getElementById('mic-button');
                 // 👶 transforma o áudio
                 const childBlob = await criarAudioVozCrianca(audioBlob);
 
-                const audioUrl = URL.createObjectURL(childBlob);
+                const reader = new FileReader();
 
-                console.log("Áudio transformado:", audioUrl);
+                reader.onload = () => {
+                    const base64Audio = reader.result;
 
-                criarMensagemAudio(audioUrl, true);
-                const msg = {
-                    audio: audioUrl,
-                    type:'audio',
-                    chat_id
-                }
+                    criarMensagemAudio(base64Audio, true);
+
+                    const msg = {
+                        audio: base64Audio,
+                        type: 'audio',
+                        chat_id
+                    };
+
+                    socket.emit('send_message', msg);
+                };
+
+                reader.readAsDataURL(childBlob);
                 socket.emit('send_message', msg);
 
                 stream.getTracks().forEach(track => track.stop());
