@@ -1,4 +1,4 @@
-agora está correto?
+
 const micButton = document.getElementById('mic-button');
     let isRecording = false;
     let mediaRecorder;
