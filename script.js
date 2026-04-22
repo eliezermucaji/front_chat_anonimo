@@ -92,8 +92,12 @@ micButton.addEventListener('click', async () => {
 // ============================
 async function criarAudioVozCrianca(audioBlob) {
 
-    const audioCtx = new AudioContext();
-    await audioCtx.resume();
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioCtx();
+
+    if (audioCtx.state === "suspended") {
+        await audioCtx.resume();
+    }
 
     const arrayBuffer = await audioBlob.arrayBuffer();
     const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
@@ -101,15 +105,16 @@ async function criarAudioVozCrianca(audioBlob) {
     const source = audioCtx.createBufferSource();
     source.buffer = audioBuffer;
 
-    // efeito criança
     source.playbackRate.value = 1.35;
 
     const dest = audioCtx.createMediaStreamDestination();
     source.connect(dest);
 
-    const recorder = new MediaRecorder(dest.stream, {
-        mimeType: "audio/webm"
-    });
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : 'audio/webm';
+
+    const recorder = new MediaRecorder(dest.stream, { mimeType });
 
     let chunks = [];
 
@@ -125,12 +130,14 @@ async function criarAudioVozCrianca(audioBlob) {
             resolve(new Blob(chunks, { type: "audio/webm" }));
         };
 
-        recorder.onerror = reject;
+        recorder.onerror = (e) => reject(e.error || e);
 
         recorder.start(100);
 
-        // 🔥 CORREÇÃO IMPORTANTE
-        source.start(0);
+        // 🔥 seguro
+        requestAnimationFrame(() => {
+            source.start(0);
+        });
 
         source.onended = () => recorder.stop();
     });
